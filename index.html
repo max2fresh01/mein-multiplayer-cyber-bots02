@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>CYBER BOTS - Neon City</title>
+  <meta name="description" content="CYBER BOTS: 2D pixel-art shooter in NEON CITY. Pick a robot, arm it, upgrade it and take down the Neon Warden.">
+  <meta name="theme-color" content="#07031a">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="in-menu">
+  <div id="app">
+
+    <!-- Spielflaeche: Canvas + HUD -->
+    <div id="stage">
+      <canvas id="game" width="480" height="270" aria-label="CYBER BOTS game screen"></canvas>
+
+      <div id="hud" hidden>
+        <div class="hud-tl">
+          <div class="hp-row"><span class="lbl">HP</span>
+            <div class="bar hp"><i id="hpFill"></i><b id="hpText">100 / 100</b></div>
+          </div>
+          <div class="cred">CREDITS <b id="hudCredits">0</b> <span class="run">+<span id="hudRun">0</span></span></div>
+        </div>
+        <div class="hud-tr">
+          <div id="hudWeapon">PLASMA BLASTER</div>
+          <div id="hudAuto" class="auto">AUTO-FIRE [F] OFF</div>
+        </div>
+        <div class="hud-prog" id="hudProg">KILLS 0 / 18</div>
+        <div class="hud-ab" id="hudAb">
+          <canvas id="abIcon" class="ab-ico" width="16" height="16"></canvas>
+          <div class="key" id="abKey">Q</div>
+          <div class="abname" id="abName">PHASE DASH</div>
+          <i class="abcd" id="abCd"></i>
+        </div>
+        <div id="bossBar" hidden><span id="bossName">NEON WARDEN</span><div class="bar boss"><i id="bossFill"></i></div></div>
+        <div id="banner"></div>
+      </div>
+    </div>
+
+    <!-- Menues -->
+    <div id="screens">
+      <div id="creditChip" class="chip-credits">CREDITS <b id="chipCredits">0</b></div>
+
+      <!-- Hauptmenue -->
+      <section class="screen open" id="scr-main">
+        <div class="menu-col">
+          <h1 class="logo"><span class="l1" data-t="CYBER">CYBER</span><span class="l2" data-t="BOTS">BOTS</span></h1>
+          <p class="tagline">NEON CITY // ROBOT COMBAT</p>
+          <nav class="nav">
+            <button class="btn big primary" data-go="play"><i class="ico">&#9654;</i> PLAY</button>
+            <button class="btn big" data-go="robots"><i class="ico">&#9881;</i> CHARACTERS</button>
+            <button class="btn big" data-go="weapons"><i class="ico">&#10039;</i> WEAPONS</button>
+            <button class="btn big" data-go="upgrades"><i class="ico">&#9650;</i> UPGRADES</button>
+            <button class="btn big" data-go="online"><i class="ico">&#9741;</i> ONLINE CO-OP</button>
+            <button class="btn big" data-go="settings"><i class="ico">&#9776;</i> SETTINGS</button>
+          </nav>
+          <p class="foot" id="mainStats"></p>
+        </div>
+      </section>
+
+      <!-- PLAY: Sektor waehlen -->
+      <section class="screen" id="scr-play">
+        <div class="panel wide">
+          <header><button class="btn back" data-go="main">&#9664; BACK</button><h2>SELECT SECTOR</h2></header>
+          <div class="play-grid">
+            <div>
+              <div class="sectors" id="sectorList"></div>
+            </div>
+            <aside class="loadout">
+              <h3>LOADOUT</h3>
+              <div class="lo-row"><canvas id="loRobot" class="prev"></canvas><div><b id="loRobotName"></b><small id="loRobotAb"></small></div></div>
+              <div class="lo-row"><canvas id="loWeapon" class="prev"></canvas><div><b id="loWeaponName"></b><small id="loWeaponInfo"></small></div></div>
+              <div class="lo-stats" id="loStats"></div>
+              <div class="lo-btns">
+                <button class="btn small" data-go="robots">CHANGE CHARACTER</button>
+                <button class="btn small" data-go="weapons">CHANGE WEAPON</button>
+              </div>
+              <h3>CONTROLS - KEYBOARD &amp; MOUSE</h3>
+              <ul class="controls">
+                <li><kbd>A</kbd><kbd>D</kbd> Move</li>
+                <li><kbd>SPACE</kbd> Jump</li>
+                <li><kbd>MOUSE</kbd> Aim &amp; <kbd>LMB</kbd> Shoot</li>
+                <li><kbd>Q</kbd> Special ability</li>
+                <li><kbd>F</kbd> Toggle auto-fire</li>
+                <li><kbd>ESC</kbd> Pause</li>
+              </ul>
+              <h3>CONTROLS - XBOX CONTROLLER</h3>
+              <ul class="controls">
+                <li><kbd>L-STICK</kbd> / <kbd>D-PAD</kbd> Move</li>
+                <li><kbd>A</kbd> Jump</li>
+                <li><kbd>R-STICK</kbd> Aim</li>
+                <li><kbd>RT</kbd> / <kbd>RB</kbd> Shoot</li>
+                <li><kbd>B</kbd> / <kbd>X</kbd> / <kbd>LB</kbd> Special ability</li>
+                <li><kbd>Y</kbd> Toggle auto-fire</li>
+                <li><kbd>START</kbd> Pause</li>
+              </ul>
+            </aside>
+          </div>
+          <button class="btn big primary launch" id="btnLaunch">LAUNCH</button>
+        </div>
+      </section>
+
+      <!-- ROBOTS -->
+      <section class="screen" id="scr-robots">
+        <div class="panel wide charsel">
+          <header><button class="btn back" data-go="main">&#9664; BACK</button><h2>CHARACTER SELECT</h2></header>
+          <div class="chars" id="charCards"></div>
+          <div class="char-detail" id="charDetail"></div>
+        </div>
+      </section>
+
+      <!-- WEAPONS -->
+      <section class="screen" id="scr-weapons">
+        <div class="panel wide">
+          <header><button class="btn back" data-go="main">&#9664; BACK</button><h2>WEAPONS</h2></header>
+          <div class="cards" id="weaponCards"></div>
+        </div>
+      </section>
+
+      <!-- UPGRADES -->
+      <section class="screen" id="scr-upgrades">
+        <div class="panel">
+          <header><button class="btn back" data-go="main">&#9664; BACK</button><h2>UPGRADES</h2></header>
+          <p class="hint">Upgrades apply to every robot and weapon. Earn credits by destroying enemies.</p>
+          <div class="upgrades" id="upgradeRows"></div>
+        </div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section class="screen" id="scr-settings">
+        <div class="panel">
+          <header><button class="btn back" data-go="main">&#9664; BACK</button><h2>SETTINGS</h2></header>
+          <div class="settings" id="settingsRows"></div>
+        </div>
+      </section>
+
+      <!-- ONLINE: Raeume -->
+      <section class="screen" id="scr-online">
+        <div class="panel">
+          <header><button class="btn back" id="onBack">&#9664; BACK</button><h2>ONLINE CO-OP</h2></header>
+          <div id="onConn">
+            <label class="on-l">SERVER</label>
+            <input id="onUrl" class="on-in" maxlength="120" spellcheck="false" autocomplete="off" aria-label="Server address">
+            <label class="on-l">NAME</label>
+            <input id="onName" class="on-in" maxlength="12" spellcheck="false" autocomplete="off" aria-label="Player name">
+            <button class="btn big primary" id="onConnect">CONNECT</button>
+          </div>
+          <div id="onLobby" hidden>
+            <div class="on-row"><button class="btn big primary" id="onCreate">CREATE ROOM</button>
+              <label class="on-chk"><input type="checkbox" id="onPub" checked> PUBLIC</label></div>
+            <label class="on-l">JOIN WITH CODE</label>
+            <div class="on-row"><input id="onCode" class="on-in code" maxlength="4" spellcheck="false" autocomplete="off" aria-label="Room code"><button class="btn" id="onJoin">JOIN</button></div>
+            <h3>OPEN ROOMS <button class="btn small" id="onRefresh">REFRESH</button></h3>
+            <div id="onRooms" class="on-list"></div>
+          </div>
+          <div id="onRoom" hidden>
+            <div class="on-code">ROOM <b id="onRoomCode">----</b></div>
+            <div id="onPlayers" class="on-list"></div>
+            <div id="onHost" class="on-row" hidden>
+              <label class="on-l">SECTOR</label><select id="onSector" class="on-in" aria-label="Sector"></select>
+              <label class="on-chk"><input type="checkbox" id="onPub2"> PUBLIC</label>
+            </div>
+            <div class="on-row">
+              <button class="btn big primary" id="onStart">START</button>
+              <button class="btn big" id="onReady">READY</button>
+              <button class="btn" id="onLeave">LEAVE ROOM</button>
+            </div>
+          </div>
+          <p id="onMsg" class="on-msg" role="status"></p>
+        </div>
+      </section>
+
+      <!-- Pause -->
+      <section class="screen" id="scr-pause">
+        <div class="panel narrow">
+          <h2>PAUSED</h2>
+          <nav class="nav">
+            <button class="btn big primary" id="pResume">RESUME</button>
+            <button class="btn big" id="pRestart">RESTART SECTOR</button>
+            <button class="btn big" id="pMenu">QUIT TO MENU</button>
+          </nav>
+          <p class="foot">ESC / START = resume &nbsp;|&nbsp; F / Y = auto-fire</p>
+        </div>
+      </section>
+
+      <!-- Ergebnis -->
+      <section class="screen" id="scr-result">
+        <div class="panel narrow">
+          <h2 id="resTitle">SECTOR CLEARED</h2>
+          <p class="hint" id="resSub"></p>
+          <div class="res-rows" id="resRows"></div>
+          <nav class="nav">
+            <button class="btn big primary" id="rNext">NEXT SECTOR</button>
+            <button class="btn big" id="rRetry">RETRY</button>
+            <button class="btn big" id="rMenu">MAIN MENU</button>
+          </nav>
+        </div>
+      </section>
+
+      <div id="padHint" aria-hidden="true"><span><kbd>D-PAD</kbd> Navigate</span><span><kbd>A</kbd> Select</span><span><kbd>B</kbd> Back</span></div>
+      <div id="toast" role="status"></div>
+    </div>
+
+    <!-- Touch-Steuerung -->
+    <div id="touch">
+      <div class="t-left">
+        <button class="tbtn" data-key="left" aria-label="Move left">&#9664;</button>
+        <button class="tbtn" data-key="right" aria-label="Move right">&#9654;</button>
+      </div>
+      <div class="t-right">
+        <button class="tbtn ab" data-key="ability" aria-label="Special ability">SP</button>
+        <button class="tbtn fire" data-key="fire" aria-label="Fire">FIRE</button>
+        <button class="tbtn jump" data-key="jump" aria-label="Jump">&#9650;</button>
+      </div>
+      <button class="tbtn tiny tpause" data-key="pause" aria-label="Pause">II</button>
+      <button class="tbtn tiny tauto" data-key="auto" aria-label="Toggle auto fire">AUTO</button>
+    </div>
+
+    <div id="rotate"><div><b>ROTATE YOUR DEVICE</b><br>CYBER BOTS plays in landscape mode.</div></div>
+  </div>
+  <div id="crt" aria-hidden="true"></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/space-config.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/audio-space.js"></script>
+  <script src="js/input.js"></script>
+  <script src="js/char-sprites.js"></script>
+  <script src="js/sprites.js"></script>
+  <script src="js/space-sprites.js"></script>
+  <script src="js/background.js"></script>
+  <script src="js/space-bg.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/hazards.js"></script>
+  <script src="js/space-enemies.js"></script>
+  <script src="js/space-enemies2.js"></script>
+  <script src="js/space-enemies3.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/net.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/online.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
